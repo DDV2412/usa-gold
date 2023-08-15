@@ -43,8 +43,11 @@ class RequestLabel extends Controller
 
         // Store Label Image
         $randomFileName = uniqid() . '.png';
-        Storage::disk('local')->put('label_images/' . $randomFileName, $labelImageContent);
-        $imageUrl = Storage::url('label_images/' . $randomFileName);
+        Storage::disk('public')->put('label_images/' . $randomFileName, $labelImageContent);
+
+        // Mengambil URL dari penyimpanan publik
+        $imageUrl = asset('storage/label_images/' . $randomFileName);
+
 
         // Post Request Label
         $urlRequest = "https://api.webflow.com/collections/64c9aca1ed6a63c07a9eaa8e/items";
@@ -54,7 +57,7 @@ class RequestLabel extends Controller
             "last-name" => $input["last_name"],
             "email" => $input["email"],
             "track-package" => $trackingID,
-            "label-link" => url($imageUrl),
+            "label-link" => $imageUrl,
             "customer-references" => $customer_references,
             "_archived" => false,
             "_draft" => false,
