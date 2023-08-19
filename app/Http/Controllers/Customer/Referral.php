@@ -23,7 +23,7 @@ class Referral extends Controller
 
         if ($customer->successful()) {
             if (isset($customer["items"][0]["referrals"])) {
-                $referralId = $customer["items"][0]["payment-option"]["_id"];
+                $referralId = $customer["items"][0]["payment-option"];
 
                 $referral = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,

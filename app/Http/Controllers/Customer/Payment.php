@@ -21,7 +21,7 @@ class Payment extends Controller
 
         if ($customer->successful()) {
             if (isset($customer["items"][0]["payment-option"])) {
-                $paymentId = $customer["items"][0]["payment-option"]["_id"];
+                $paymentId = $customer["items"][0]["payment-option"];
 
                 $payment = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,

@@ -21,7 +21,7 @@ class Government extends Controller
 
         if ($customer->successful()) {
             if (isset($customer["items"][0]["government-identification"])) {
-                $governmentId = $customer["items"][0]["government-identification"]["_id"];
+                $governmentId = $customer["items"][0]["government-identification"];
 
                 $government = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
