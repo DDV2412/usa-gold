@@ -8,23 +8,21 @@ use Illuminate\Support\Facades\Http;
 
 class GetCustomer extends Controller
 {
-    public function index(Request $request){
-        $query = $request->query('query');
-        $input = $request->all();
+    public function index(Request $request) {
+        $query = $request->query('email');
         $tokenApi = env('WEBFLOW_API');
-        $siteId = env('SITE_ID');
-
+    
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->get("https://api.webflow.com/collections/64c9deffefe08e9b2651414d/items");
-        
+        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items");
+    
         if ($response->successful()) {
-            $data = json_decode($response->body()); 
+            $data = $response->json();
             $groupedData = [];
-
-            foreach ($data->items as $item) {
-                $email = $item->email;
-
+    
+            foreach ($data["items"] as $item) {
+                $email = $item["email"];
+    
                 // Jika query ada dan email cocok dengan query
                 if ($query && $email === $query) {
                     if (!isset($groupedData[$email])) {
@@ -33,26 +31,20 @@ class GetCustomer extends Controller
                             'items' => [],
                         ];
                     }
-
-                    $requestPageId = $item->{'request-gold-pack'};
-
-                    $requestPackResponse = Http::withHeaders([
-                        'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->get("https://api.webflow.com/collections/64c9aca1ed6a63c07a9eaa8e/items/{$requestPageId}");
-
-                    if ($requestPackResponse->successful()) {
-                        $responseRequestData = json_decode($requestPackResponse->body());
-
-                        $item->{'request-gold-pack'} = $responseRequestData->items;
-                    }
-
                     $groupedData[$email]['items'][] = $item;
                 }
             }
-        
-            return $groupedData; 
+    
+            return response()->json([
+                'success' => true,
+                'data' => $groupedData
+            ], 200);
         } else {
-            echo $response->body();
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
         }
     }
+    
 }

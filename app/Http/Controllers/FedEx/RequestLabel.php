@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Http\FedEx\Shipping;
+use App\Http\FedEx\LocationService;
 
 class RequestLabel extends Controller
 {
@@ -17,89 +18,279 @@ class RequestLabel extends Controller
         $input = $request->all();
         $tokenApi = env('WEBFLOW_API');
         $siteId = env('SITE_ID');
-
-        // Invite User
-        $userEmail = [
-            "email" => $input["email"],
-        ];
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $tokenApi,
-        ])->post("https://api.webflow.com/sites/${siteId}/users/invite", $userEmail);
-        
-        if ($response->successful()) {
-           // echo $response->status();  
-        } else {
-            echo $response->body(); 
-        }
-        
-
         $customer_references = strval(rand(1000, 9999));
+        
 
         // Create FedEx Shipping
         $fedExShipping = new Shipping($input, $customer_references);
         $result = $fedExShipping->shipping();
+
+        // Cek apakah ada error
+        if (!empty($result->Notifications)) {
+            $error = [];
+            $success = true; // Default success to true
+            foreach ($result->Notifications as $notification) {
+                $error[] = $notification->toArray();
+
+                if ($notification->Severity === 'ERROR') {
+                    $success = false; // If an error notification is found, set success to false
+                }
+            }
+            if (!$success) {
+                return response()->json(['success' => false, 'error' => $error], 400);
+            }
+        }
+
         $trackingID = $result->CompletedShipmentDetail->MasterTrackingId->TrackingNumber;
         $labelImageContent = $result->CompletedShipmentDetail->CompletedPackageDetails[0]->Label->Parts[0]->Image;
 
         // Store Label Image
         $randomFileName = uniqid() . '.png';
-        Storage::disk('public')->put('label_images/' . $randomFileName, $labelImageContent);
+        Storage::disk('public')->put('labels/' . $randomFileName, $labelImageContent);
 
         // Mengambil URL dari penyimpanan publik
-        $imageUrl = asset('storage/label_images/' . $randomFileName);
+        $imageUrl = asset('storage/labels/' . $randomFileName);
 
-
-        // Post Request Label
-        $urlRequest = "https://api.webflow.com/collections/64c9aca1ed6a63c07a9eaa8e/items";
-        $fields = [
-            "slug" => Str::slug(uniqid() . '-' . Str::random(8)),
-            "name" => $input["first_name"],
-            "last-name" => $input["last_name"],
+        $userEmail = [
             "email" => $input["email"],
-            "track-package" => $trackingID,
-            "label-link" => $imageUrl,
-            "customer-references" => $customer_references,
-            "_archived" => false,
-            "_draft" => false,
         ];
-        $requestGold = Http::withHeaders([
+
+        $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->post($urlRequest, ['fields' => $fields]);
+        ])->timeout(30)->post("https://api.webflow.com/sites/${siteId}/users/invite", $userEmail);
+        
+        if ($response->successful()) {
+            ini_set('max_execution_time', 360);
+            $fedExLocation = new LocationService($input);
+            $result = $fedExLocation->location();
 
-        if ($requestGold->successful()) {
-           // echo $requestGold->status();
-            $responseData = json_decode($requestGold->body(), true);
+            $addressField = [];
 
-            // Post Customer Detail
-            $urlCustomer = "https://api.webflow.com/collections/64c9deffefe08e9b2651414d/items";
-            $fieldCustomer = [
-                "slug" => Str::slug(uniqid() . '-' . Str::random(8)),
+            foreach ($result as $distanceAndLocationDetails) {
+                $addressResult =  $distanceAndLocationDetails->LocationDetail->LocationContactAndAddress->Address->toArray();
+                // Hanya memproses data dengan 'city' yang cocok dengan $input["city"]
+                if ($addressResult["City"] == $input["city"]) {
+                    $address = [
+                        "name" => $addressResult["StreetLines"],
+                        "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
+                        "address" => $addressResult["StreetLines"],
+                        "city" => $addressResult["City"],
+                        "state" => $addressResult["StateOrProvinceCode"],
+                        "zip" => $addressResult["PostalCode"],
+                        "_archived" => false,
+                        "_draft" => false,
+                    ];
+
+                    $responseLocation = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $tokenApi,
+                    ])->timeout(30)->post("https://api.webflow.com/collections/".env('LOCATION')."/items", ['fields' => $address]);
+
+
+                    if($responseLocation->successful()){
+                        $addressField[] = $responseLocation["_id"];
+                    }
+
+                    $filteredAddresses[] = $address;
+
+                    // Keluar dari loop setelah 8 data telah ditemukan
+                    if (count($filteredAddresses) >= 8) {
+                        break;
+                    }
+                }
+            }
+
+            //    Create Request
+            $labelField = [
                 "name" => $input["first_name"],
+                "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
                 "last-name" => $input["last_name"],
                 "email" => $input["email"],
-                "address" => $input["address"],
                 "phone-number" => $input["phone_number"],
+                "address" => $input["address"],
+                "unit-app" => $input["unit_app"],
                 "city" => $input["city"],
                 "state" => $input["state"],
                 "zip" => $input["zip"],
+                "reff" => $customer_references,
                 "date-request" => Carbon::now()->toIso8601String(),
-                "request-gold-pack" => $responseData['_id'],
+                "track-package" => $trackingID,
+                "locations" => $addressField,
+                "order-status" => 'Kit Request',
+                "label" => $imageUrl,
                 "_archived" => false,
                 "_draft" => false,
             ];
-            $responseCustomer = Http::withHeaders([
+
+            $responseLabel = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $tokenApi,
-            ])->post($urlCustomer, ['fields' => $fieldCustomer]);
+            ])->timeout(30)->post("https://api.webflow.com/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
 
-            if ($responseCustomer->successful()) {
-              //  echo $responseCustomer->status();
+            if ($responseLabel->successful()) {
+                //    Create Customer
+                $customerField = [
+                    "name" => $input["first_name"],
+                    "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
+                    "last-name" => $input["last_name"],
+                    "email" => $input["email"],
+                    "phone-number" => $input["phone_number"],
+                    "address" => $input["address"],
+                    "unit-app" => $input["unit_app"],
+                    "city" => $input["city"],
+                    "state" => $input["state"],
+                    "zip" => $input["zip"],
+                    "reff" => $customer_references,
+                    'request-gold-packs' => [$responseLabel['_id']],
+                    "_archived" => false,
+                    "_draft" => false,
+                ];
+
+                $responseCustomer = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $tokenApi,
+                ])->timeout(30)->post("https://api.webflow.com/collections/".env('CUSTOMER')."/items", ['fields' => $customerField]);
+
+                if ($responseCustomer->successful()) {
+                    return response()->json([
+                        'success' => true,
+                        'data' => $responseCustomer->json()
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Please check your input address or email'
+                    ], 400);
+                }
+
             } else {
-                echo $responseCustomer->body();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please check your input address or email'
+                ], 400);
             }
-        } else {
-            echo $requestGold->body();
-        }
 
-        return response()->json(['success' => true], 200);
+        } else {
+            if($response->status() === 409){
+                $getAllCustomer = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $tokenApi,
+                ])->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items");
+
+
+                if ($getAllCustomer->successful()) {
+                    $customer = null;
+                    foreach ($getAllCustomer['items'] as $item) {
+                        if ($item['email'] === $input["email"]) {
+                            $customer = $item;
+                            break; // Menghentikan perulangan setelah menemukan item yang sesuai
+                        }
+                    }
+
+                    ini_set('max_execution_time', 360);
+                    $fedExLocation = new LocationService($input);
+                    $result = $fedExLocation->location();
+
+                    $addressField = [];
+
+                    foreach ($result as $distanceAndLocationDetails) {
+                        $addressResult =  $distanceAndLocationDetails->LocationDetail->LocationContactAndAddress->Address->toArray();
+                        // Hanya memproses data dengan 'city' yang cocok dengan $input["city"]
+                        if ($addressResult["City"] == $input["city"]) {
+                            $address = [
+                                "name" => $addressResult["StreetLines"],
+                                "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
+                                "address" => $addressResult["StreetLines"],
+                                "city" => $addressResult["City"],
+                                "state" => $addressResult["StateOrProvinceCode"],
+                                "zip" => $addressResult["PostalCode"],
+                                "_archived" => false,
+                                "_draft" => false,
+                            ];
+
+                            $responseLocation = Http::withHeaders([
+                                'Authorization' => 'Bearer ' . $tokenApi,
+                            ])->timeout(30)->post("https://api.webflow.com/collections/".env('LOCATION')."/items", ['fields' => $address]);
+
+
+                            if($responseLocation->successful()){
+                                $addressField[] = $responseLocation["_id"];
+                            }
+
+                            $filteredAddresses[] = $address;
+
+                            // Keluar dari loop setelah 8 data telah ditemukan
+                            if (count($filteredAddresses) >= 8) {
+                                break;
+                            }
+                        }
+                    }
+
+                    $labelField = [
+                        "name" => $input["first_name"],
+                        "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
+                        "last-name" => $input["last_name"],
+                        "email" => $input["email"],
+                        "phone-number" => $input["phone_number"],
+                        "address" => $input["address"],
+                        "unit-app" => $input["unit_app"],
+                        "city" => $input["city"],
+                        "state" => $input["state"],
+                        "zip" => $input["zip"],
+                        "reff" =>  $customer["reff"],
+                        "date-request" => Carbon::now()->toIso8601String(),
+                        "track-package" => $trackingID,
+                        "order-status" => 'Kit Request',
+                        "label" => $imageUrl,
+                        "locations" => $addressField,
+                        "_archived" => false,
+                        "_draft" => false,
+                    ];
+        
+                    $responseLabel = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $tokenApi,
+                    ])->timeout(30)->post("https://api.webflow.com/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
+        
+                    if ($responseLabel->successful()) {
+
+                        $existingRequestGoldPacks = $customer['request-gold-packs'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
+                       
+
+                        $customerField['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['_id']]);
+                        //    Update Customer
+                        $customerField = [
+                            "name" => $customer["name"],
+                            "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
+                            'request-gold-packs' => $customerField['request-gold-packs'],
+                            "_archived" => false,
+                            "_draft" => false,
+                        ];
+        
+                        $responseCustomer = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $tokenApi,
+                        ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/" . $customer["_id"], ['fields' => $customerField]);
+        
+                        if ($responseCustomer->successful()) {
+                            return response()->json([
+                                'success' => true,
+                                'data' => $responseCustomer->json()
+                            ], 200);
+                        }else{
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Please check your input address or email'
+                            ], 400);
+                        }
+        
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Please check your input address or email'
+                        ], 400);
+                    }
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Please check your input address or email'
+                    ], 400);
+                }
+            }
+        }
     }
 }

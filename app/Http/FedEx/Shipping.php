@@ -47,8 +47,8 @@ class Shipping{
 
         $addressLines = $this->data['address'];
 
-        if (!empty($this->data['app_unit'])) {
-            $addressLines = $this->data['address'] . " " . $this->data['app_unit'];
+        if (!empty($this->data['unit_app'])) {
+            $addressLines = $this->data['address'] . " " . $this->data['unit_app'];
         }
 
         $shipperAddress = new ComplexType\Address();
@@ -148,10 +148,7 @@ class Shipping{
         // live producation url
         $shipService->getSoapClient()->__setLocation('https://ws.fedex.com:443/web-services/ship');
         $result = $shipService->getProcessShipmentReply($processShipmentRequest);
-        $error = array();
-        foreach ($result->Notifications as $key => $value) {
-        $error[] = $value->toArray();
-        }
+    
 
         return $result;
     }
