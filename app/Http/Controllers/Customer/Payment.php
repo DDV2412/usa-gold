@@ -31,7 +31,7 @@ class Payment extends Controller
                     $paymentsField = [
                         "name"=> $payment["items"][0]["name"],
                         "slug" =>  $payment["items"][0]["slug"],
-                        "payment-references"=> $input["payment_references"]  ?? "",
+                        "payment-preferences"=> $input["payment_preferences"]  ?? "",
                         "bank-routing-number" => $input["bank_routing_number"]  ?? "",
                         "checking-account-number"=> $input["checking_account_number"]  ?? "",
                         "paypal-email"=> $input["paypal_email"]  ?? "", 

@@ -29,8 +29,8 @@ class Government extends Controller
 
                 if($government->successful()){
                     $governmentField = [
-                        "name"=> $customer["items"][0]["government-identification"]["name"],
-                        "slug" => $customer["items"][0]["government-identification"]["slug"],
+                        "name"=> $input["identification_number"],
+                        "slug" => $government["items"][0]["slug"],
                         "identification-type"=> $input["identification_type"],
                         "state"=> $input["state"],
                         "_archived" => false,

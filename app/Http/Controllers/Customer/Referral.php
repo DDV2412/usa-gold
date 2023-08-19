@@ -23,7 +23,7 @@ class Referral extends Controller
 
         if ($customer->successful()) {
             if (isset($customer["items"][0]["referrals"])) {
-                $referralId = $customer["items"][0]["payment-option"];
+                $referralId = $customer["items"][0]["referrals"];
 
                 $referral = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
@@ -31,8 +31,8 @@ class Referral extends Controller
 
                 if($referral->successful()){
                     $referralsField = [
-                        "name"=> $customer["items"][0]["referrals"]["name"],
-                        "slug" =>  $customer["items"][0]["referrals"]["slug"],
+                        "name"=> $input["first_name"],
+                        "slug" =>  $referral["items"][0]["slug"],
                         "last-name"=> $input["last_name"],
                         "gender" => $input["gender"] ?? "",
                         "email"=> $input["email"],
@@ -54,7 +54,7 @@ class Referral extends Controller
                         $customerField = [
                             "name" => $customer["items"][0]["name"],
                             "slug" => $customer["items"][0]["slug"],
-                            "referrals" => $referralCreate['_id'],
+                            "referrals" => $referralUpdate['_id'],
                             "_archived" => false,
                             "_draft" => false,
                         ];
