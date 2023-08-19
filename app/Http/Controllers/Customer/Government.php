@@ -20,7 +20,7 @@ class Government extends Controller
 
 
         if ($customer->successful()) {
-            if (isset($customer["items"][0]["government-identification"]) && is_object($customer["items"][0]["government-identification"])) {
+            if (isset($customer["items"][0]["government-identification"])) {
                 $governmentId = $customer["items"][0]["government-identification"]["_id"];
 
                 $government = Http::withHeaders([

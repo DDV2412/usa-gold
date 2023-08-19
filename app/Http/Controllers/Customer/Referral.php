@@ -22,7 +22,7 @@ class Referral extends Controller
 
 
         if ($customer->successful()) {
-            if (isset($customer["items"][0]["referrals"]) && is_object($customer["items"][0]["referrals"])) {
+            if (isset($customer["items"][0]["referrals"])) {
                 $referralId = $customer["items"][0]["payment-option"]["_id"];
 
                 $referral = Http::withHeaders([

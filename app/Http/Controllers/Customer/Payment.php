@@ -20,7 +20,7 @@ class Payment extends Controller
 
 
         if ($customer->successful()) {
-            if (isset($customer["items"][0]["payment-option"]) && is_object($customer["items"][0]["payment-option"])) {
+            if (isset($customer["items"][0]["payment-option"])) {
                 $paymentId = $customer["items"][0]["payment-option"]["_id"];
 
                 $payment = Http::withHeaders([
