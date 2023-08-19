@@ -59,6 +59,10 @@ class LocationService{
         $locationServiceRequest = new Request();
         $searchLocationsReply = $locationServiceRequest->getSearchLocationsReply($searchLocationsRequest);
 
+        if (empty($searchLocationsReply->AddressToLocationRelationships[0]->DistanceAndLocationDetails)) {
+            return;
+        }
+
         return $searchLocationsReply->AddressToLocationRelationships[0]->DistanceAndLocationDetails;
         
     }
