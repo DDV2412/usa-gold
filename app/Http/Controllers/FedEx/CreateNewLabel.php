@@ -8,7 +8,6 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Http\FedEx\Shipping;
-use App\Http\FedEx\LocationService;
 use Illuminate\Support\Facades\Http;
 
 class CreateNewLabel extends Controller
@@ -64,46 +63,8 @@ class CreateNewLabel extends Controller
             // Mengambil URL dari penyimpanan publik
             $imageUrl = asset('storage/labels/' . $randomFileName);
 
-            ini_set('max_execution_time', 180);
-            $fedExLocation = new LocationService($input);
-            $resultLocation = $fedExLocation->location();
-
             $addressField = [];
 
-            if(!empty($resultLocation)){
-                foreach ($resultLocation as $distanceAndLocationDetails) {
-                    $addressResult =  $distanceAndLocationDetails->LocationDetail->LocationContactAndAddress->Address->toArray();
-                    // Hanya memproses data dengan 'city' yang cocok dengan $input["city"]
-                    if ($addressResult["City"] == $input["city"]) {
-                        $address = [
-                            "name" => $addressResult["StreetLines"],
-                            "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
-                            "address" => $addressResult["StreetLines"],
-                            "city" => $addressResult["City"],
-                            "state" => $addressResult["StateOrProvinceCode"],
-                            "zip" => $addressResult["PostalCode"],
-                            "_archived" => false,
-                            "_draft" => false,
-                        ];
-    
-                        $responseLocation = Http::withHeaders([
-                            'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->post("https://api.webflow.com/collections/".env('LOCATION')."/items", ['fields' => $address]);
-    
-    
-                        if($responseLocation->successful()){
-                            $addressField[] = $responseLocation["_id"];
-                        }
-    
-                        $filteredAddresses[] = $address;
-    
-                        // Keluar dari loop setelah 8 data telah ditemukan
-                        if (count($filteredAddresses) >= 8) {
-                            break;
-                        }
-                    }
-                }
-            }
 
             $labelField = [
                 "name" => $customer["items"][0]["name"],
