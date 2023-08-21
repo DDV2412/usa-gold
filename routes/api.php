@@ -29,7 +29,7 @@ use App\Http\Controllers\Customer\Statistic;
 */
 
 // Support
-Route::post('/support', [Support::class, 'index'])->name('support');
+Route::post('/support/{customer_id}', [Support::class, 'index'])->name('support');
 
 // Request Label
 Route::post('/label', [RequestLabel::class, 'index'])->name('request-label');

@@ -12,8 +12,6 @@ class Support extends Controller
     public function index(Request $request, $customer_id)
     {
         $tokenApi = env('WEBFLOW_API');
-        $input = $request->all();
-
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
         ])->timeout(30)->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
@@ -44,7 +42,7 @@ class Support extends Controller
                 $documentUrl = asset("storage/$subDirectory/$newFileName");
     
                 $supportField = [
-                    "name"=> $input["name"],
+                    "name"=> $request["requestPack"],
                     "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
                     "estimation"=> $request["estimation"],
                     "sending" => $request["sending"] ?? "",

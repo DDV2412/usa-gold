@@ -25,7 +25,7 @@ class Profile extends Controller
                 "slug" => $customer["items"][0]['slug'],
                 "last-name"=> $input["last_name"],
                 "gender" => $input["gender"] ?? "",
-                "email"=> $input["email"],
+                "email"=> $customer["items"][0]["email"],
                 "phone-number"=> $input["phone_number"],
                 "address"=> $input["address"],
                 "unit-app"=> $input["unit_app"] ?? "",

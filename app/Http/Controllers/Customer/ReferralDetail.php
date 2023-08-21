@@ -17,20 +17,22 @@ class ReferralDetail extends Controller
         ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
-            $referral = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->get("https://api.webflow.com/collections/" . env('REFERRALS') . "/items/" .$response["items"]["0"]["referrals"]);
-    
-            if($referral->successful()){
-                return response()->json([
-                    'success' => true,
-                    'data' => $referral->json()
-                ], 200);
-            }else{
-                return response()->json([
-                    'success' => false,
-                    'data' => 'Referral not found'
-                ], 404);
+            if(isset($response["items"]["0"]["referrals"])){
+                $referral = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $tokenApi,
+                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('REFERRALS') . "/items/" .$response["items"]["0"]["referrals"]);
+        
+                if($referral->successful()){
+                    return response()->json([
+                        'success' => true,
+                        'data' => $referral->json()
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'success' => false,
+                        'data' => 'Referral not found'
+                    ], 404);
+                }
             }
         } else {
             return response()->json([

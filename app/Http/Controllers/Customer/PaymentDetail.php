@@ -16,20 +16,22 @@ class PaymentDetail extends Controller
         ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
-            $payment = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->get("https://api.webflow.com/collections/" . env('PAYMENT') . "/items/" .$response["items"]["0"]["payment-option"]);
-    
-            if($payment->successful()){
-                return response()->json([
-                    'success' => true,
-                    'data' => $payment->json()
-                ], 200);
-            }else{
-                return response()->json([
-                    'success' => false,
-                    'data' => 'Referral not found'
-                ], 404);
+            if(isset($response["items"]["0"]["payment-option"])){
+                $payment = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $tokenApi,
+                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('PAYMENT') . "/items/" .$response["items"]["0"]["payment-option"]);
+        
+                if($payment->successful()){
+                    return response()->json([
+                        'success' => true,
+                        'data' => $payment->json()
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'success' => false,
+                        'data' => 'Referral not found'
+                    ], 404);
+                }
             }
         } else {
             return response()->json([

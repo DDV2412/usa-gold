@@ -16,20 +16,22 @@ class GovernmentDetail extends Controller
         ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
-            $government = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->get("https://api.webflow.com/collections/" . env('GOVERNMENT') . "/items/" .$response["items"]["0"]["government-identification"]);
-    
-            if($government->successful()){
-                return response()->json([
-                    'success' => true,
-                    'data' => $government->json()
-                ], 200);
-            }else{
-                return response()->json([
-                    'success' => false,
-                    'data' => 'Referral not found'
-                ], 404);
+            if(isset($response["items"]["0"]["government-identification"])){
+                $government = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $tokenApi,
+                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('GOVERNMENT') . "/items/" .$response["items"]["0"]["government-identification"]);
+        
+                if($government->successful()){
+                    return response()->json([
+                        'success' => true,
+                        'data' => $government->json()
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'success' => false,
+                        'data' => 'Referral not found'
+                    ], 404);
+                }
             }
         } else {
             return response()->json([
