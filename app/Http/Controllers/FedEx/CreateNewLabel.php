@@ -9,6 +9,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Http\FedEx\Shipping;
 use Illuminate\Support\Facades\Http;
+use App\Helpers\BarcodeGenerator;
+
 
 class CreateNewLabel extends Controller
 {
@@ -37,6 +39,8 @@ class CreateNewLabel extends Controller
             $fedExShipping = new Shipping($input, $customer["items"][0]["reff"]);
             $result = $fedExShipping->shipping();
 
+            
+
             // Cek apakah ada error
             if (!empty($result->Notifications)) {
                 $error = [];
@@ -63,7 +67,12 @@ class CreateNewLabel extends Controller
             // Mengambil URL dari penyimpanan publik
             $imageUrl = asset('storage/labels/' . $randomFileName);
 
-            $addressField = [];
+
+
+            $barcodeGenerator = new BarcodeGenerator($input);
+
+            // Generate barcode dan dapatkan URL gambar
+            $barcodeUrl = $barcodeGenerator->generateUrl();
 
 
             $labelField = [
@@ -81,8 +90,8 @@ class CreateNewLabel extends Controller
                 "date-request" => Carbon::now()->toIso8601String(),
                 "track-package" => $trackingID,
                 "order-status" => 'Kit Request',
-                "locations" => $addressField,
                 "label" => $imageUrl,
+                "barcode" => $barcodeUrl,
                 "_archived" => false,
                 "_draft" => false,
             ];

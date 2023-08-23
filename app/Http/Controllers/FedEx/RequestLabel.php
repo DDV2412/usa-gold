@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Http\FedEx\Shipping;
+use App\Helpers\BarcodeGenerator;
 
 class RequestLabel extends Controller
 {
@@ -50,6 +51,7 @@ class RequestLabel extends Controller
         // Mengambil URL dari penyimpanan publik
         $imageUrl = asset('storage/labels/' . $randomFileName);
 
+
         $userEmail = [
             "email" => $input["email"],
         ];
@@ -59,8 +61,13 @@ class RequestLabel extends Controller
         ])->timeout(30)->post("https://api.webflow.com/sites/${siteId}/users/invite", $userEmail);
         
         if ($response->successful()) {
-            $addressField = [];
 
+
+            $barcodeGenerator = new BarcodeGenerator($input);
+
+            // Generate barcode dan dapatkan URL gambar
+            $barcodeUrl = $barcodeGenerator->generateUrl();
+            
             //    Create Request
             $labelField = [
                 "name" => $input["first_name"],
@@ -76,9 +83,9 @@ class RequestLabel extends Controller
                 "reff" => $customer_references,
                 "date-request" => Carbon::now()->toIso8601String(),
                 "track-package" => $trackingID,
-                "locations" => $addressField,
                 "order-status" => 'Kit Request',
                 "label" => $imageUrl,
+                "barcode" => $barcodeUrl,
                 "_archived" => false,
                 "_draft" => false,
             ];
@@ -141,12 +148,25 @@ class RequestLabel extends Controller
                     foreach ($getAllCustomer['items'] as $item) {
                         if ($item['email'] === $input["email"]) {
                             $customer = $item;
-                            break; // Menghentikan perulangan setelah menemukan item yang sesuai
+                            break;
                         }
                     }
 
+                    if($customer === null){
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Your email has been registered, please check your email contact and follow the instructions'
+                        ], 400);
+                    }
 
-                    $addressField = [];
+                    
+                    
+
+        
+                    $barcodeGenerator = new BarcodeGenerator($input);
+
+                    // Generate barcode dan dapatkan URL gambar
+                    $barcodeUrl = $barcodeGenerator->generateUrl();
 
                     $labelField = [
                         "name" => $input["first_name"],
@@ -164,7 +184,7 @@ class RequestLabel extends Controller
                         "track-package" => $trackingID,
                         "order-status" => 'Kit Request',
                         "label" => $imageUrl,
-                        "locations" => $addressField,
+                        "barcode" => $barcodeUrl,
                         "_archived" => false,
                         "_draft" => false,
                     ];
