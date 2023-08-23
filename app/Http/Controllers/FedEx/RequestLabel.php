@@ -62,8 +62,13 @@ class RequestLabel extends Controller
         
         if ($response->successful()) {
 
+            $text = [
+                'reff' => $customer_references,
+                'text' => $customer_references . $input["first_name"] .  $input["last_name"] . Carbon::now()->toIso8601String()
+            ];
 
-            $barcodeGenerator = new BarcodeGenerator($input);
+
+            $barcodeGenerator = new BarcodeGenerator($text);
 
             // Generate barcode dan dapatkan URL gambar
             $barcodeUrl = $barcodeGenerator->generateUrl();
@@ -120,7 +125,7 @@ class RequestLabel extends Controller
                 if ($responseCustomer->successful()) {
                     return response()->json([
                         'success' => true,
-                        'data' => $responseCustomer->json()
+                        'data' => $responseLabel->json()
                     ], 200);
                 }else{
                     return response()->json([
@@ -150,20 +155,16 @@ class RequestLabel extends Controller
                             $customer = $item;
                             break;
                         }
-                    }
+                    }                   
 
-                    if($customer === null){
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Your email has been registered, please check your email contact and follow the instructions'
-                        ], 400);
-                    }
-
-                    
-                    
-
+                    $text = [
+                        'reff' => $customer["reff"],
+                        'text' => $customer["reff"] . $input["first_name"] .  $input["last_name"] . Carbon::now()->toIso8601String()
+                    ];
         
-                    $barcodeGenerator = new BarcodeGenerator($input);
+                    
+        
+                    $barcodeGenerator = new BarcodeGenerator($text);
 
                     // Generate barcode dan dapatkan URL gambar
                     $barcodeUrl = $barcodeGenerator->generateUrl();
@@ -215,7 +216,7 @@ class RequestLabel extends Controller
                         if ($responseCustomer->successful()) {
                             return response()->json([
                                 'success' => true,
-                                'data' => $responseCustomer->json()
+                                'data' => $responseLabel->json()
                             ], 200);
                         }else{
                             return response()->json([

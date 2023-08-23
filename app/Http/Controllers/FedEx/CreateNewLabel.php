@@ -65,11 +65,15 @@ class CreateNewLabel extends Controller
             Storage::disk('public')->put('labels/' . $randomFileName, $labelImageContent);
 
             // Mengambil URL dari penyimpanan publik
-            $imageUrl = asset('storage/labels/' . $randomFileName);
+            $imageUrl = asset('storage/labels/' . $randomFileName);;
+
+            $text = [
+                'reff' => $customer["items"][0]["reff"],
+                'text' => $customer["items"][0]["reff"] . $customer["items"][0]["name"] .  $customer["items"][0]["last-name"] . Carbon::now()->toIso8601String()
+            ];
 
 
-
-            $barcodeGenerator = new BarcodeGenerator($input);
+            $barcodeGenerator = new BarcodeGenerator($text);
 
             // Generate barcode dan dapatkan URL gambar
             $barcodeUrl = $barcodeGenerator->generateUrl();
@@ -122,7 +126,7 @@ class CreateNewLabel extends Controller
                 if ($responseCustomer->successful()) {
                     return response()->json([
                         'success' => true,
-                        'data' => $responseCustomer->json()
+                        'data' => $responseLabel->json()
                     ], 200);
                 }else{
                     return response()->json([

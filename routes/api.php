@@ -19,7 +19,7 @@ use App\Http\Controllers\Customer\GoldPacks;
 use App\Http\Controllers\Customer\UploadDocs;
 use App\Http\Controllers\Customer\Statistic;
 use App\Http\Controllers\Documents\Delete;
-use App\Http\Controllers\EmailController;
+use App\Http\Controllers\Customer\EmailController;
 
 
 
@@ -85,4 +85,4 @@ Route::delete('/storage/documents/{file}', [Delete::class, 'index'])->name('dele
 
 Route::post('/location}', [Location::class, 'index'])->name('location');
 
-Route::post('/send-email', [EmailController::class, 'index'])->name('send-mail');
+Route::get('/send-email', [EmailController::class, 'index'])->name('send-mail');
