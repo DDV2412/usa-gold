@@ -83,6 +83,6 @@ Route::get('/statics/{customer_id}', [Statistic::class, 'index'])->name('statics
 
 Route::delete('/storage/documents/{file}', [Delete::class, 'index'])->name('delete');
 
-Route::post('/location}', [Location::class, 'index'])->name('location');
+Route::post('/location', [Location::class, 'index'])->name('location');
 
 Route::get('/send-email', [EmailController::class, 'index'])->name('send-mail');

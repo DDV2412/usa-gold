@@ -63,8 +63,8 @@ class RequestLabel extends Controller
         if ($response->successful()) {
 
             $text = [
-                'reff' => $customer_references,
-                'text' => $customer_references . $input["first_name"] .  $input["last_name"] . Carbon::now()->toIso8601String()
+                'unique' => $customer_references . ' ' . Carbon::now()->toIso8601String(),
+                'text' => $customer_references . ' ' . $input["first_name"] . ' ' . $input["last_name"] . ' ' . Carbon::now()->toIso8601String()
             ];
 
 
@@ -158,8 +158,8 @@ class RequestLabel extends Controller
                     }                   
 
                     $text = [
-                        'reff' => $customer["reff"],
-                        'text' => $customer["reff"] . $input["first_name"] .  $input["last_name"] . Carbon::now()->toIso8601String()
+                        'unique' => $customer["reff"] . ' ' . Carbon::now()->toIso8601String(),
+                        'text' => $customer["reff"] . ' ' . $input["first_name"] . ' ' . $input["last_name"] . ' ' . Carbon::now()->toIso8601String()
                     ];
         
                     

@@ -16,7 +16,7 @@ class BarcodeGenerator
 
     function generateUrl()
     {
-        $text = "{$this->data['reff']}";
+        $text = "{$this->data['unique']}";
         $generator = new BarcodeGeneratorPNG();
         $barcode = $generator->getBarcode($text, $generator::TYPE_CODE_128);
 
@@ -24,9 +24,11 @@ class BarcodeGenerator
         $barcodeWidth = imagesx($barcode_image);
         $barcodeHeight = imagesy($barcode_image);
 
-
-        // Create a new image with barcode and text
-        $imageWidth = $barcodeWidth;
+        // Menghitung panjang teks
+        $textLength = strlen($this->data['text']);
+        
+        // Menghitung panjang total gambar (barcode + 20 padding di kiri dan kanan)
+        $imageWidth = $barcodeWidth + (20 * 2); // Padding kiri dan kanan
         $imageHeight = $barcodeHeight + 50; // Space for text
         $newImage = imagecreatetruecolor($imageWidth, $imageHeight);
 
@@ -34,34 +36,32 @@ class BarcodeGenerator
         $backgroundColor = imagecolorallocate($newImage, 255, 255, 255);
         imagefill($newImage, 0, 0, $backgroundColor);
 
-        // Copy barcode to the new image
-        imagecopy($newImage, $barcode_image, 0, 0, 0, 0, $barcodeWidth, $barcodeHeight);
+        // Copy barcode to the new image with padding
+        imagecopy($newImage, $barcode_image, 16, 0, 0, 0, $barcodeWidth, $barcodeHeight);
 
         // Add text
         $textColor = imagecolorallocate($newImage, 0, 0, 0);
-        $textWidth = imagefontwidth(5) * strlen($this->data['text']);
-        $textX = ($imageWidth - $textWidth) / 2;;
+        $textWidth = imagefontwidth(5) * $textLength;
+        $textX = ($imageWidth - $textWidth) / 2;
         $textY = $barcodeHeight + 16;
         imagestring($newImage, 16, $textX, $textY, $this->data['text'], $textColor);
 
-        // Simpan gambar sementara dalam file lokal
+        // Create a temporary image file
         $tempImagePath = tempnam(sys_get_temp_dir(), 'barcode');
         imagepng($newImage, $tempImagePath);
 
-
-        // Menghasilkan nama unik untuk berkas barcode
+        // Generate a unique name for the barcode file
         $barcodeName = uniqid() . '.png';
 
-        // Menyimpan gambar dalam penyimpanan Laravel
+        // Save the image to Laravel storage
         Storage::disk('public')->put('barcode/' . $barcodeName, file_get_contents($tempImagePath));
 
-        // Hapus file sementara
+        // Delete the temporary file
         unlink($tempImagePath);
 
-        // Mengambil URL dari penyimpanan publik
+        // Get the URL of the stored image
         $imageUrl = asset('storage/barcode/' . $barcodeName);
 
         return $imageUrl;
     }
-
 }

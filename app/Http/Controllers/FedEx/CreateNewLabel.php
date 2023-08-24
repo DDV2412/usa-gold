@@ -68,9 +68,12 @@ class CreateNewLabel extends Controller
             $imageUrl = asset('storage/labels/' . $randomFileName);;
 
             $text = [
-                'reff' => $customer["items"][0]["reff"],
-                'text' => $customer["items"][0]["reff"] . $customer["items"][0]["name"] .  $customer["items"][0]["last-name"] . Carbon::now()->toIso8601String()
+                'unique' => $customer["items"][0]["reff"] . ' ' . Carbon::now()->toIso8601String(),
+                'text' => $customer["items"][0]["reff"] . ' ' . $customer["items"][0]["name"] . ' ' .  $customer["items"][0]["last-name"] . Carbon::now()->toIso8601String()
             ];
+
+   
+
 
 
             $barcodeGenerator = new BarcodeGenerator($text);

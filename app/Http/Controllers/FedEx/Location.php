@@ -16,27 +16,17 @@ class Location extends Controller
 
         $addressField = [];
 
-        if (!empty($resultLocation)) {
-            $addressResultMatch = $resultLocation->MatchedAddress;
-        
-            $mainAddressField = [
-                "address" => $addressResultMatch->StreetLines,
-                "city" => $input["city"],
-                "state" => $addressResultMatch->StateOrProvinceCode,
-                "zip" => $addressResultMatch->PostalCode,
-                "match" => true,
-            ];
-        
-            $addressField[] = $mainAddressField;
-        
-            foreach ($resultLocation->DistanceAndLocationDetails as $distanceAndLocationDetails) {
-                $addressResult = $distanceAndLocationDetails->LocationDetail->LocationContactAndAddress->Address;
+        if (!empty($resultLocation)) {       
+            foreach ($resultLocation->DistanceAndLocationDetails as $location) {
+
         
                 $address = [
-                    "address" => $addressResult->StreetLines,
-                    "city" => $addressResult->City,
-                    "state" => $addressResult->StateOrProvinceCode,
-                    "zip" => $addressResult->PostalCode,
+                    "street" => $location->LocationDetail->LocationContactAndAddress->Address->StreetLines,
+                    "city" => $location->LocationDetail->LocationContactAndAddress->Address->City,
+                    "state" => $location->LocationDetail->LocationContactAndAddress->Address->StateOrProvinceCode,
+                    "zip" => $location->LocationDetail->LocationContactAndAddress->Address->PostalCode,
+                    "distance" => $location->Distance->Value . ' ' . $location->Distance->Units,
+                    "description" => $location->LocationDetail->LocationContactAndAddress->Contact->CompanyName,
                 ];
         
                 $addressField[] = $address;
