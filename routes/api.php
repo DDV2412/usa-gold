@@ -20,6 +20,7 @@ use App\Http\Controllers\Customer\UploadDocs;
 use App\Http\Controllers\Customer\Statistic;
 use App\Http\Controllers\Documents\Delete;
 use App\Http\Controllers\Customer\EmailController;
+use App\Http\Controllers\Publish\Collection;
 
 
 
@@ -80,6 +81,9 @@ Route::get('/document/{customer_id}', [UploadDocs::class, 'index'])->name('docum
 // Get All Docs 
 Route::get('/statics/{customer_id}', [Statistic::class, 'index'])->name('statics');
 
+
+
+Route::get('/collection/{collection_id}', [Collection::class, 'index'])->name('collection');
 
 Route::delete('/storage/documents/{file}', [Delete::class, 'index'])->name('delete');
 
