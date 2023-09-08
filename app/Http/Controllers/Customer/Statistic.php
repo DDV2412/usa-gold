@@ -13,7 +13,7 @@ class Statistic extends Controller
         
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
         
         if ($response->successful()) {
             $customerData = $response->json();
@@ -29,7 +29,7 @@ class Statistic extends Controller
             foreach ($requestGoldPacks as $goldPack) {
                 $goldPackResponse = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('GOLDPACK') . "/items/" . $goldPack);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('GOLDPACK') . "/items/" . $goldPack);
         
                 if ($goldPackResponse->successful()) {
                     $goldPackData[] = $goldPackResponse->json();

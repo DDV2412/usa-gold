@@ -29,7 +29,7 @@ class Upload extends Controller
 
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
+        ])->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id);
 
         if ($customer->successful()) {
             try {
@@ -68,7 +68,7 @@ class Upload extends Controller
 
                 $responseDocument = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/collections/".env('DOCUMENT')."/items", ['fields' => $documentField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('DOCUMENT')."/items", ['fields' => $documentField]);
     
                 if ($responseDocument->successful()) {
                     $existingDocument = $customer["items"][0]['document-uploads'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
@@ -84,7 +84,7 @@ class Upload extends Controller
 
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
 
                     if ($responseCustomer->successful()) {
                         return response()->json([

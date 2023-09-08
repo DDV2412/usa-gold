@@ -14,13 +14,13 @@ class ReferralDetail extends Controller
     
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
             if(isset($response["items"]["0"]["referrals"])){
                 $referral = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('REFERRALS') . "/items/" .$response["items"]["0"]["referrals"]);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('REFERRALS') . "/items/" .$response["items"]["0"]["referrals"]);
         
                 if($referral->successful()){
                     return response()->json([

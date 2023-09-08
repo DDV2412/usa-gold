@@ -58,7 +58,7 @@ class RequestLabel extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->post("https://api.webflow.com/sites/${siteId}/users/invite", $userEmail);
+        ])->timeout(30)->post("https://api.webflow.com/beta/sites/${siteId}/users/invite", $userEmail);
         
         if ($response->successful()) {
 
@@ -97,7 +97,7 @@ class RequestLabel extends Controller
 
             $responseLabel = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->post("https://api.webflow.com/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
+            ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
 
             if ($responseLabel->successful()) {
                 //    Create Customer
@@ -120,7 +120,7 @@ class RequestLabel extends Controller
 
                 $responseCustomer = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/collections/".env('CUSTOMER')."/items", ['fields' => $customerField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items", ['fields' => $customerField]);
 
                 if ($responseCustomer->successful()) {
                     return response()->json([
@@ -145,7 +145,7 @@ class RequestLabel extends Controller
             if($response->status() === 409){
                 $getAllCustomer = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items");
+                ])->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items");
 
 
                 if ($getAllCustomer->successful()) {
@@ -192,7 +192,7 @@ class RequestLabel extends Controller
         
                     $responseLabel = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->post("https://api.webflow.com/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
+                    ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
         
                     if ($responseLabel->successful()) {
 
@@ -211,7 +211,7 @@ class RequestLabel extends Controller
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/" . $customer["_id"], ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/" . $customer["_id"], ['fields' => $customerField]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([

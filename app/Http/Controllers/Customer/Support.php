@@ -14,7 +14,7 @@ class Support extends Controller
         $tokenApi = env('WEBFLOW_API');
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id);
 
 
         if ($customer->successful()) {
@@ -56,7 +56,7 @@ class Support extends Controller
 
                 $responseDocument = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/collections/".env('SUPPORT')."/items", ['fields' => $supportField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('SUPPORT')."/items", ['fields' => $supportField]);
     
                 if ($responseDocument->successful()) {
                     return response()->json([

@@ -18,7 +18,7 @@ class Referral extends Controller
 
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id);
 
 
         if ($customer->successful()) {
@@ -27,7 +27,7 @@ class Referral extends Controller
 
                 $referral = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/".env('REFERRALS')."/items/".$referralId);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/".$referralId);
 
                 if($referral->successful()){
                     $referralsField = [
@@ -48,7 +48,7 @@ class Referral extends Controller
 
                     $referralUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('REFERRALS')."/items/".$referralId, ['fields' => $referralsField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/".$referralId, ['fields' => $referralsField]);
 
                     if($referralUpdate->successful()){
                         $customerField = [
@@ -61,7 +61,7 @@ class Referral extends Controller
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -105,7 +105,7 @@ class Referral extends Controller
 
                 $referralCreate = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/collections/".env('REFERRALS')."/items/", ['fields' => $referralsField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/", ['fields' => $referralsField]);
 
                 if($referralCreate->successful()){
                     $customerField = [
@@ -118,7 +118,7 @@ class Referral extends Controller
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

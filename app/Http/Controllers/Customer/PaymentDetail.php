@@ -13,13 +13,13 @@ class PaymentDetail extends Controller
     
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
             if(isset($response["items"]["0"]["payment-option"])){
                 $payment = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('PAYMENT') . "/items/" .$response["items"]["0"]["payment-option"]);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('PAYMENT') . "/items/" .$response["items"]["0"]["payment-option"]);
         
                 if($payment->successful()){
                     return response()->json([

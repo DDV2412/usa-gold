@@ -20,7 +20,7 @@ class CreateNewLabel extends Controller
 
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id);
 
 
         if ($customer->successful()) {
@@ -105,7 +105,7 @@ class CreateNewLabel extends Controller
 
             $responseLabel = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->post("https://api.webflow.com/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
+            ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
 
             if ($responseLabel->successful()) {
 
@@ -124,7 +124,7 @@ class CreateNewLabel extends Controller
 
                 $responseCustomer = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
 
                 if ($responseCustomer->successful()) {
                     return response()->json([

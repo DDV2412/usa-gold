@@ -14,7 +14,7 @@ class GetCustomer extends Controller
     
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items");
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items");
     
         if ($response->successful()) {
             $data = $response->json();

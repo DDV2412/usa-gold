@@ -16,7 +16,7 @@ class EmailController extends Controller
     
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/".env('GOLDPACK')."/items/".$pack_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items/".$pack_id);
     
         if ($customer->successful()) {
 

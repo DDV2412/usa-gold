@@ -15,7 +15,7 @@ class Collection extends Controller
         
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,'Content-Type' => 'application/json',
-        ])->timeout(30)->put("https://api.webflow.com/collections/".env('GOLDPACK')."/items/publish", ['itemIds' => $itemIds]);
+        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items/publish", ['itemIds' => $itemIds]);
         
         if ($response->successful()) {
             $customerData = $response->json();

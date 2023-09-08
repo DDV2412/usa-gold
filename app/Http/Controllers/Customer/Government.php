@@ -16,7 +16,7 @@ class Government extends Controller
 
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id);
 
 
         if ($customer->successful()) {
@@ -25,7 +25,7 @@ class Government extends Controller
 
                 $government = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/".env('GOVERNMENT')."/items/".$governmentId);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/".$governmentId);
 
                 if($government->successful()){
                     $governmentField = [
@@ -39,7 +39,7 @@ class Government extends Controller
 
                     $governmentUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('GOVERNMENT')."/items/".$governmentId, ['fields' => $governmentField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/".$governmentId, ['fields' => $governmentField]);
 
                     if($governmentUpdate->successful()){
                         $customerField = [
@@ -52,7 +52,7 @@ class Government extends Controller
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -89,7 +89,7 @@ class Government extends Controller
 
                 $governmentCreate = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/collections/".env('GOVERNMENT')."/items/", ['fields' => $governmentField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/", ['fields' => $governmentField]);
 
                 if($governmentCreate->successful()){
                     $customerField = [
@@ -102,7 +102,7 @@ class Government extends Controller
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

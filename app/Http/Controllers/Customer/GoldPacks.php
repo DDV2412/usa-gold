@@ -13,7 +13,7 @@ class GoldPacks extends Controller
         
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
         
         if ($response->successful()) {
             $customerData = $response->json();
@@ -23,7 +23,7 @@ class GoldPacks extends Controller
             foreach ($requestGoldPackIds as $goldPackId) {
                 $goldPackResponse = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/" . env('GOLDPACK') . "/items/" . $goldPackId);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('GOLDPACK') . "/items/" . $goldPackId);
         
                 if ($goldPackResponse->successful()) {
                     $goldPackData[] = $goldPackResponse->json();

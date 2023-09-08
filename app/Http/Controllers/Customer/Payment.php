@@ -16,7 +16,7 @@ class Payment extends Controller
 
         $customer = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id);
 
 
         if ($customer->successful()) {
@@ -25,7 +25,7 @@ class Payment extends Controller
 
                 $payment = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/collections/".env('PAYMENT')."/items/".$paymentId);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/".$paymentId);
 
                 if($payment->successful()){
                     $paymentsField = [
@@ -43,7 +43,7 @@ class Payment extends Controller
 
                     $paymentUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('PAYMENT')."/items/".$paymentId, ['fields' => $paymentsField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/".$paymentId, ['fields' => $paymentsField]);
 
                     if($paymentUpdate->successful()){
                         $customerField = [
@@ -56,7 +56,7 @@ class Payment extends Controller
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -97,7 +97,7 @@ class Payment extends Controller
 
                 $paymentCreate = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/collections/".env('PAYMENT')."/items/", ['fields' => $paymentsField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/", ['fields' => $paymentsField]);
 
                 if($paymentCreate->successful()){
                     $customerField = [
@@ -110,7 +110,7 @@ class Payment extends Controller
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

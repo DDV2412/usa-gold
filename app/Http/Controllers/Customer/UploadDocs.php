@@ -13,7 +13,7 @@ class UploadDocs extends Controller
         
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
+        ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
         
         if ($response->successful()) {
             $customerData = $response->json();
@@ -25,7 +25,7 @@ class UploadDocs extends Controller
                 foreach ($requestDocsIds as $docsId) {
                     $docsResponse = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->get("https://api.webflow.com/collections/" . env('DOCUMENT') . "/items/" . $docsId);
+                    ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('DOCUMENT') . "/items/" . $docsId);
             
                     if ($docsResponse->successful()) {
                         $documentData[] = $docsResponse->json();
