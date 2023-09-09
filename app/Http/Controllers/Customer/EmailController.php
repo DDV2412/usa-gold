@@ -13,34 +13,49 @@ class EmailController extends Controller
 
         $pack_id = $request->query('id');
         $tokenApi = env('WEBFLOW_API');
+
+        $itemIds = [$pack_id];
+        
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $tokenApi,'Content-Type' => 'application/json',
+        ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items/publish", ['itemIds' => $itemIds]);
+        
+        if ($response->successful()) {
+            $customer = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $tokenApi,
+            ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items/".$pack_id);
     
-        $customer = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $tokenApi,
-        ])->timeout(30)->get("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items/".$pack_id);
+        
+            if ($customer->successful()) {
     
-        if ($customer->successful()) {
-
-            $frontendUrl = env('FRONTEND_URL') . '/request-gold-pack/' . $customer["fieldData"]["slug"];
-
-            $data = [
-                "name" => $customer["fieldData"]["name"] . ' ' . $customer["fieldData"]["last-name"],
-                "frontendUrl" => $frontendUrl
-            ];
-
-            Mail::send('template.email', $data, function ($message) use ($customer) {
-                $message->to($customer["fieldData"]["email"], $customer["fieldData"]["name"] . ' ' . $customer["fieldData"]["last-name"])
-                        ->subject('Your New Request a Gold Pack')
-                        ->from('usagold.us@gmail.com', 'USA Gold');
-            });
-
-            return response()->json(['message' => 'Email sent successfully']);
-        }else{
+                $frontendUrl = env('FRONTEND_URL') . '/request-gold-pack/' . $customer["fieldData"]["slug"];
+    
+                $data = [
+                    "name" => $customer["fieldData"]["name"] . ' ' . $customer["fieldData"]["last-name"],
+                    "frontendUrl" => $frontendUrl
+                ];
+    
+                Mail::send('template.email', $data, function ($message) use ($customer) {
+                    $message->to($customer["fieldData"]["email"], $customer["fieldData"]["name"] . ' ' . $customer["fieldData"]["last-name"])
+                            ->subject('Your New Request a Gold Pack')
+                            ->from('usagold.us@gmail.com', 'USA Gold');
+                });
+    
+                return response()->json(['message' => 'Email sent successfully']);
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please check your input address or email'
+                ], 400);
+            }
+    
+        } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Please check your input address or email'
-            ], 400);
+                'message' => "Collection ID not found"
+            ], 404);
         }
-
+        
     }
 }
 
