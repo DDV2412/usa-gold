@@ -32,27 +32,25 @@ class Government extends Controller
                         "name"=> $input["identification_number"],
                         "slug" => $government["items"][0]["slug"],
                         "identification-type"=> $input["identification_type"],
-                        "state"=> $input["state"],
-                        "_archived" => false,
-                        "_draft" => false,
+                        "state"=> $input["state"]
                     ];
 
                     $governmentUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/".$governmentId, ['fields' => $governmentField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/".$governmentId, ['fieldData' => $governmentField, "isArchived" => false,
+                    "isDraft" => false]);
 
                     if($governmentUpdate->successful()){
                         $customerField = [
                             "name" => $customer["items"][0]["name"],
                             "slug" => $customer["items"][0]["slug"],
-                            "government-identification" => $governmentUpdate['_id'],
-                            "_archived" => false,
-                            "_draft" => false,
+                            "government-identification" => $governmentUpdate['id'],
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
+                        "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -83,26 +81,24 @@ class Government extends Controller
                     "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
                     "identification-type"=> $input["identification_type"],
                     "state"=> $input["state"],
-                    "_archived" => false,
-                    "_draft" => false,
                 ];
 
                 $governmentCreate = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/", ['fields' => $governmentField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/", ['fieldData' => $governmentField, "isArchived" => false,
+                "isDraft" => false]);
 
                 if($governmentCreate->successful()){
                     $customerField = [
                         "name" => $customer["items"][0]["name"],
                         "slug" => $customer["items"][0]["slug"],
-                        "government-identification" => $governmentCreate['_id'],
-                        "_archived" => false,
-                        "_draft" => false,
+                        "government-identification" => $governmentCreate['id'],
                     ];
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
+                    "isDraft" => false]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

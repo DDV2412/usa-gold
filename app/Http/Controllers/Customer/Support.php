@@ -49,14 +49,12 @@ class Support extends Controller
                     "description"=> $request["description"],
                     "negotiable"=> $request["negotiable"],
                     "customer"=> $customer_id,
-                    "file-upload"=> $documentUrl,
-                    "_archived" => false,
-                    "_draft" => false,
+                    "file-upload"=> $documentUrl
                 ];
 
                 $responseDocument = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('SUPPORT')."/items", ['fields' => $supportField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('SUPPORT')."/items", ['fieldData' => $supportField, "isArchived" => false, "isDraft" => false]);
     
                 if ($responseDocument->successful()) {
                     return response()->json([

@@ -31,15 +31,13 @@ class Profile extends Controller
                 "unit-app"=> $input["unit_app"] ?? "",
                 "city"=> $input["city"],
                 "state"=> $input["state"],
-                "zip"=> $input["zip"],
-                "_archived" => false,
-                "_draft" => false,
+                "zip"=> $input["zip"]
             ];
             
 
             $responseCustomer = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+            ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
 
             if ($responseCustomer->successful()) {
                 return response()->json([

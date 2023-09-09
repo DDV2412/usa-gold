@@ -41,27 +41,23 @@ class Referral extends Controller
                         "unit-app"=> $input["unit_app"] ?? "",
                         "city"=> $input["city"],
                         "state"=> $input["state"],
-                        "zip"=> $input["zip"],
-                        "_archived" => false,
-                        "_draft" => false,
+                        "zip"=> $input["zip"]
                     ];
 
                     $referralUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/".$referralId, ['fields' => $referralsField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/".$referralId, ['fieldData' => $referralsField, "isArchived" => false, "isDraft" => false]);
 
                     if($referralUpdate->successful()){
                         $customerField = [
                             "name" => $customer["items"][0]["name"],
                             "slug" => $customer["items"][0]["slug"],
-                            "referrals" => $referralUpdate['_id'],
-                            "_archived" => false,
-                            "_draft" => false,
+                            "referrals" => $referralUpdate['id']
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -98,27 +94,23 @@ class Referral extends Controller
                     "unit-app"=> $input["unit_app"] ?? "",
                     "city"=> $input["city"],
                     "state"=> $input["state"],
-                    "zip"=> $input["zip"],
-                    "_archived" => false,
-                    "_draft" => false,
+                    "zip"=> $input["zip"]
                 ];
 
                 $referralCreate = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/", ['fields' => $referralsField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/", ['fieldData' => $referralsField, "isArchived" => false, "isDraft" => false]);
 
                 if($referralCreate->successful()){
                     $customerField = [
                         "name" => $customer["items"][0]["name"],
                         "slug" => $customer["items"][0]["slug"],
-                        "referrals" => $referralCreate['_id'],
-                        "_archived" => false,
-                        "_draft" => false,
+                        "referrals" => $referralCreate['id']
                     ];
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

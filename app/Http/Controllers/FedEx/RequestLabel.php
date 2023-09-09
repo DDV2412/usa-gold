@@ -90,16 +90,15 @@ class RequestLabel extends Controller
                 "track-package" => $trackingID,
                 "order-status" => 'Kit Request',
                 "label" => $imageUrl,
-                "barcode" => $barcodeUrl,
-                "_archived" => false,
-                "_draft" => false,
+                "barcode" => $barcodeUrl
             ];
 
             $responseLabel = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
+            ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fieldData' => $labelField, "isArchived" => false, "isDraft" => false]);
 
             if ($responseLabel->successful()) {
+
                 //    Create Customer
                 $customerField = [
                     "name" => $input["first_name"],
@@ -113,14 +112,12 @@ class RequestLabel extends Controller
                     "state" => $input["state"],
                     "zip" => $input["zip"],
                     "reff" => $customer_references,
-                    'request-gold-packs' => [$responseLabel['_id']],
-                    "_archived" => false,
-                    "_draft" => false,
+                    'request-gold-packs' => [$responseLabel['id']]
                 ];
 
                 $responseCustomer = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items", ['fields' => $customerField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items", ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
 
                 if ($responseCustomer->successful()) {
                     return response()->json([
@@ -185,33 +182,30 @@ class RequestLabel extends Controller
                         "track-package" => $trackingID,
                         "order-status" => 'Kit Request',
                         "label" => $imageUrl,
-                        "barcode" => $barcodeUrl,
-                        "_archived" => false,
-                        "_draft" => false,
+                        "barcode" => $barcodeUrl
                     ];
         
                     $responseLabel = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fields' => $labelField]);
+                    ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('GOLDPACK')."/items", ['fieldData' => $labelField, "isArchived" => false, "isDraft" => false]);
         
                     if ($responseLabel->successful()) {
+
 
                         $existingRequestGoldPacks = $customer['request-gold-packs'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
                        
 
-                        $customerField['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['_id']]);
+                        $customerField['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['id']]);
                         //    Update Customer
                         $customerField = [
                             "name" => $customer["name"],
                             "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
-                            'request-gold-packs' => $customerField['request-gold-packs'],
-                            "_archived" => false,
-                            "_draft" => false,
+                            'request-gold-packs' => $customerField['request-gold-packs']
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/" . $customer["_id"], ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/" . $customer["_id"], ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([

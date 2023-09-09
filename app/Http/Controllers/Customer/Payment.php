@@ -37,26 +37,24 @@ class Payment extends Controller
                         "paypal-email"=> $input["paypal_email"]  ?? "", 
                         "zelle-email"=> $input["zelle_email"]  ?? "",
                         "zelle-phone-number"=> $input["zelle_phone_number"] ?? "",
-                        "_archived" => false,
-                        "_draft" => false,
                     ];
 
                     $paymentUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/".$paymentId, ['fields' => $paymentsField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/".$paymentId, ['fieldData' => $paymentsField, "isArchived" => false,
+                    "isDraft" => false]);
 
                     if($paymentUpdate->successful()){
                         $customerField = [
                             "name" => $customer["items"][0]["name"],
                             "slug" => $customer["items"][0]["slug"],
-                            "payment-option" => $paymentUpdate['_id'],
-                            "_archived" => false,
-                            "_draft" => false,
+                            "payment-option" => $paymentUpdate['id'],
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
+                        "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -91,26 +89,23 @@ class Payment extends Controller
                     "paypal-email"=> $input["paypal_email"]  ?? "", 
                     "zelle-email"=> $input["zelle_email"]  ?? "",
                     "zelle-phone-number"=> $input["zelle_phone_number"] ?? "",
-                    "_archived" => false,
-                    "_draft" => false,
                 ];
 
                 $paymentCreate = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/", ['fields' => $paymentsField]);
+                ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/", ['fieldData' => $paymentsField, "isArchived" => false,
+                "isDraft" => false]);
 
                 if($paymentCreate->successful()){
                     $customerField = [
                         "name" => $customer["items"][0]["name"],
                         "slug" => $customer["items"][0]["slug"],
-                        "payment-option" => $paymentCreate['_id'],
-                        "_archived" => false,
-                        "_draft" => false,
+                        "payment-option" => $paymentCreate['id']
                     ];
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fields' => $customerField]);
+                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([
