@@ -22,10 +22,10 @@ class Profile extends Controller
         if ($customer->successful()) {
             $customerField = [
                 "name"=> $input["first_name"],
-                "slug" => $customer["items"][0]['slug'],
+                "slug" => $customer["fieldData"]['slug'],
                 "last-name"=> $input["last_name"],
                 "gender" => $input["gender"] ?? "",
-                "email"=> $customer["items"][0]["email"],
+                "email"=> $customer["fieldData"]["email"],
                 "phone-number"=> $input["phone_number"],
                 "address"=> $input["address"],
                 "unit-app"=> $input["unit_app"] ?? "",
@@ -37,7 +37,7 @@ class Profile extends Controller
 
             $responseCustomer = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $tokenApi,
-            ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
+            ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
 
             if ($responseCustomer->successful()) {
                 return response()->json([

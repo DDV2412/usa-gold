@@ -20,15 +20,15 @@ class EmailController extends Controller
     
         if ($customer->successful()) {
 
-            $frontendUrl = env('FRONTEND_URL') . '/request-gold-pack/' . $customer["items"][0]["slug"];
+            $frontendUrl = env('FRONTEND_URL') . '/request-gold-pack/' . $customer["fieldData"]["slug"];
 
             $data = [
-                "name" => $customer["items"][0]["name"] . ' ' . $customer["items"][0]["last-name"],
+                "name" => $customer["fieldData"]["name"] . ' ' . $customer["fieldData"]["last-name"],
                 "frontendUrl" => $frontendUrl
             ];
 
             Mail::send('template.email', $data, function ($message) use ($customer) {
-                $message->to($customer["items"][0]["email"], $customer["items"][0]["name"] . ' ' . $customer["items"][0]["last-name"])
+                $message->to($customer["fieldData"]["email"], $customer["fieldData"]["name"] . ' ' . $customer["fieldData"]["last-name"])
                         ->subject('Your New Request a Gold Pack')
                         ->from('usagold.us@gmail.com', 'USA Gold');
             });

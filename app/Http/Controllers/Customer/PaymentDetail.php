@@ -16,10 +16,10 @@ class PaymentDetail extends Controller
         ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
-            if(isset($response["items"]["0"]["payment-option"])){
+            if(isset($response["fieldData"]["payment-option"])){
                 $payment = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('PAYMENT') . "/items/" .$response["items"]["0"]["payment-option"]);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('PAYMENT') . "/items/" .$response["fieldData"]["payment-option"]);
         
                 if($payment->successful()){
                     return response()->json([

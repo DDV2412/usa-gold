@@ -20,8 +20,8 @@ class Payment extends Controller
 
 
         if ($customer->successful()) {
-            if (isset($customer["items"][0]["payment-option"])) {
-                $paymentId = $customer["items"][0]["payment-option"];
+            if (isset($customer["fieldData"]["payment-option"])) {
+                $paymentId = $customer["fieldData"]["payment-option"];
 
                 $payment = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
@@ -29,8 +29,8 @@ class Payment extends Controller
 
                 if($payment->successful()){
                     $paymentsField = [
-                        "name"=> $payment["items"][0]["name"],
-                        "slug" =>  $payment["items"][0]["slug"],
+                        "name"=> $payment["fieldData"]["name"],
+                        "slug" =>  $payment["fieldData"]["slug"],
                         "payment-preferences"=> $input["payment_preferences"]  ?? "",
                         "bank-routing-number" => $input["bank_routing_number"]  ?? "",
                         "checking-account-number"=> $input["checking_account_number"]  ?? "",
@@ -41,19 +41,19 @@ class Payment extends Controller
 
                     $paymentUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/".$paymentId, ['fieldData' => $paymentsField, "isArchived" => false,
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('PAYMENT')."/items/".$paymentId, ['fieldData' => $paymentsField, "isArchived" => false,
                     "isDraft" => false]);
 
                     if($paymentUpdate->successful()){
                         $customerField = [
-                            "name" => $customer["items"][0]["name"],
-                            "slug" => $customer["items"][0]["slug"],
+                            "name" => $customer["fieldData"]["name"],
+                            "slug" => $customer["fieldData"]["slug"],
                             "payment-option" => $paymentUpdate['id'],
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
+                        ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
                         "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
@@ -98,14 +98,14 @@ class Payment extends Controller
 
                 if($paymentCreate->successful()){
                     $customerField = [
-                        "name" => $customer["items"][0]["name"],
-                        "slug" => $customer["items"][0]["slug"],
+                        "name" => $customer["fieldData"]["name"],
+                        "slug" => $customer["fieldData"]["slug"],
                         "payment-option" => $paymentCreate['id']
                     ];
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

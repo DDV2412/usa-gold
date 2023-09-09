@@ -24,19 +24,21 @@ class CreateNewLabel extends Controller
 
 
         if ($customer->successful()) {
+            
             $input = [
-                "first_name"=> $customer["items"][0]["name"],
-                "last_name"=> $customer["items"][0]["last-name"],
-                "email"=> $customer["items"][0]["email"],
-                "phone_number"=> $customer["items"][0]["phone-number"],
-                "address"=> $customer["items"][0]["address"],
-                "unit_app"=> $customer["items"][0]["unit-app"] ?? "",
-                "city"=> $customer["items"][0]["city"],
-                "state"=> $customer["items"][0]["state"],
-                "zip"=> $customer["items"][0]["zip"]
+                "first_name"=> $customer["fieldData"]["name"],
+                "last_name"=> $customer["fieldData"]["last-name"],
+                "email"=> $customer["fieldData"]["email"],
+                "phone_number"=> $customer["fieldData"]["phone-number"],
+                "address"=> $customer["fieldData"]["address"],
+                "unit_app"=> $customer["fieldData"]["unit-app"] ?? "",
+                "city"=> $customer["fieldData"]["city"],
+                "state"=> $customer["fieldData"]["state"],
+                "zip"=> $customer["fieldData"]["zip"]
             ];
             // Create FedEx Shipping
-            $fedExShipping = new Shipping($input, $customer["items"][0]["reff"]);
+            
+            $fedExShipping = new Shipping($input, $customer["fieldData"]["reff"]);
             $result = $fedExShipping->shipping();
 
             
@@ -60,19 +62,27 @@ class CreateNewLabel extends Controller
             $trackingID = $result->CompletedShipmentDetail->MasterTrackingId->TrackingNumber;
             $labelImageContent = $result->CompletedShipmentDetail->CompletedPackageDetails[0]->Label->Parts[0]->Image;
 
+            
             // Store Label Image
             $randomFileName = uniqid() . '.png';
             Storage::disk('public')->put('labels/' . $randomFileName, $labelImageContent);
 
+            
+
             // Mengambil URL dari penyimpanan publik
             $imageUrl = asset('storage/labels/' . $randomFileName);;
 
+            
+
             $text = [
-                'unique' => $customer["items"][0]["reff"] . ' ' . Carbon::now()->toIso8601String(),
-                'text' => $customer["items"][0]["reff"] . ' ' . $customer["items"][0]["name"] . ' ' .  $customer["items"][0]["last-name"] . Carbon::now()->toIso8601String()
+                'unique' => $customer["fieldData"]["reff"] . ' ' . Carbon::now()->toIso8601String(),
+                'text' => $customer["fieldData"]["reff"] . ' ' . $customer["fieldData"]["name"] . ' ' .  $customer["fieldData"]["last-name"] . Carbon::now()->toIso8601String()
             ];
 
+            
+
    
+            
 
 
 
@@ -83,17 +93,17 @@ class CreateNewLabel extends Controller
 
 
             $labelField = [
-                "name" => $customer["items"][0]["name"],
+                "name" => $customer["fieldData"]["name"],
                 "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
-                "last-name" =>$customer["items"][0]["last-name"],
-                "email" => $customer["items"][0]["email"],
-                "phone-number" => $customer["items"][0]["phone-number"],
-                "address" => $customer["items"][0]["address"],
-                "unit-app" => $customer["items"][0]["unit-app"] ?? "",
+                "last-name" =>$customer["fieldData"]["last-name"],
+                "email" => $customer["fieldData"]["email"],
+                "phone-number" => $customer["fieldData"]["phone-number"],
+                "address" => $customer["fieldData"]["address"],
+                "unit-app" => $customer["fieldData"]["unit-app"] ?? "",
                 "city" => $input["city"],
-                "state" => $customer["items"][0]["state"],
-                "zip" => $customer["items"][0]["zip"],
-                "reff" => $customer["items"][0]["reff"],
+                "state" => $customer["fieldData"]["state"],
+                "zip" => $customer["fieldData"]["zip"],
+                "reff" => $customer["fieldData"]["reff"],
                 "date-request" => Carbon::now()->toIso8601String(),
                 "track-package" => $trackingID,
                 "order-status" => 'Kit Request',
@@ -107,20 +117,20 @@ class CreateNewLabel extends Controller
 
             if ($responseLabel->successful()) {
 
-                $existingRequestGoldPacks = $customer["items"][0]['request-gold-packs'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
+                $existingRequestGoldPacks = $customer["fieldData"]['request-gold-packs'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
                
 
-                $customerField['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['id']]);
+                $customerField["fieldData"]['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['id']]);
                 //    Update Customer
                 $customerField = [
-                    "name" => $customer["items"][0]["name"],
+                    "name" => $customer["fieldData"]["name"],
                     "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
-                    'request-gold-packs' => $customerField['request-gold-packs']
+                    'request-gold-packs' => $customerField["fieldData"]['request-gold-packs']
                 ];
 
                 $responseCustomer = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
+                ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
 
                 if ($responseCustomer->successful()) {
                     return response()->json([

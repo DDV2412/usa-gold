@@ -20,8 +20,8 @@ class Government extends Controller
 
 
         if ($customer->successful()) {
-            if (isset($customer["items"][0]["government-identification"])) {
-                $governmentId = $customer["items"][0]["government-identification"];
+            if (isset($customer["fieldData"]["government-identification"])) {
+                $governmentId = $customer["fieldData"]["government-identification"];
 
                 $government = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
@@ -30,26 +30,26 @@ class Government extends Controller
                 if($government->successful()){
                     $governmentField = [
                         "name"=> $input["identification_number"],
-                        "slug" => $government["items"][0]["slug"],
+                        "slug" => $government["fieldData"]["slug"],
                         "identification-type"=> $input["identification_type"],
                         "state"=> $input["state"]
                     ];
 
                     $governmentUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/".$governmentId, ['fieldData' => $governmentField, "isArchived" => false,
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('GOVERNMENT')."/items/".$governmentId, ['fieldData' => $governmentField, "isArchived" => false,
                     "isDraft" => false]);
 
                     if($governmentUpdate->successful()){
                         $customerField = [
-                            "name" => $customer["items"][0]["name"],
-                            "slug" => $customer["items"][0]["slug"],
+                            "name" => $customer["fieldData"]["name"],
+                            "slug" => $customer["fieldData"]["slug"],
                             "government-identification" => $governmentUpdate['id'],
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
+                        ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
                         "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
@@ -90,14 +90,14 @@ class Government extends Controller
 
                 if($governmentCreate->successful()){
                     $customerField = [
-                        "name" => $customer["items"][0]["name"],
-                        "slug" => $customer["items"][0]["slug"],
+                        "name" => $customer["fieldData"]["name"],
+                        "slug" => $customer["fieldData"]["slug"],
                         "government-identification" => $governmentCreate['id'],
                     ];
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false,
                     "isDraft" => false]);
     
                     if ($responseCustomer->successful()) {

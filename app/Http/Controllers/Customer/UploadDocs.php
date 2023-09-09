@@ -18,8 +18,8 @@ class UploadDocs extends Controller
         if ($response->successful()) {
             $customerData = $response->json();
 
-            if(isset($customerData["items"][0]["document-uploads"])){
-                $requestDocsIds = $customerData["items"][0]["document-uploads"];
+            if(isset($customerData["fieldData"]["document-uploads"])){
+                $requestDocsIds = $customerData["fieldData"]["document-uploads"];
     
                 $documentData = [];
                 foreach ($requestDocsIds as $docsId) {
@@ -32,11 +32,11 @@ class UploadDocs extends Controller
                     }
                 }
         
-                $customerData["items"][0]["document-uploads"] = $documentData;
+                $customerData["fieldData"]["document-uploads"] = $documentData;
         
                 return response()->json([
                     'success' => true,
-                    'data' => $customerData["items"][0]
+                    'data' => $customerData["fieldData"]
                 ], 200);
             }else{
                 return response()->json([

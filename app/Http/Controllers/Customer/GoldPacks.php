@@ -17,7 +17,8 @@ class GoldPacks extends Controller
         
         if ($response->successful()) {
             $customerData = $response->json();
-            $requestGoldPackIds = $customerData["items"][0]["request-gold-packs"];
+            $requestGoldPackIds = $customerData["fieldData"]["request-gold-packs"];
+            
     
             $goldPackData = [];
             foreach ($requestGoldPackIds as $goldPackId) {
@@ -30,11 +31,11 @@ class GoldPacks extends Controller
                 }
             }
     
-            $customerData["items"][0]["request-gold-packs"] = $goldPackData;
+            $customerData["fieldData"]["request-gold-packs"] = $goldPackData;
     
             return response()->json([
                 'success' => true,
-                'data' => $customerData["items"][0]
+                'data' => $customerData["fieldData"]
             ], 200);
         } else {
             return response()->json([

@@ -16,10 +16,10 @@ class GovernmentDetail extends Controller
         ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
-            if(isset($response["items"]["0"]["government-identification"])){
+            if(isset($response["fieldData"]["government-identification"])){
                 $government = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('GOVERNMENT') . "/items/" .$response["items"]["0"]["government-identification"]);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('GOVERNMENT') . "/items/" .$response["fieldData"]["government-identification"]);
         
                 if($government->successful()){
                     return response()->json([

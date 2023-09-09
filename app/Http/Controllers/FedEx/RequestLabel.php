@@ -147,16 +147,17 @@ class RequestLabel extends Controller
 
                 if ($getAllCustomer->successful()) {
                     $customer = null;
+
                     foreach ($getAllCustomer['items'] as $item) {
-                        if ($item['email'] === $input["email"]) {
+                        if ($item['fieldData']['email'] === $input["email"]) {
                             $customer = $item;
                             break;
                         }
                     }                   
 
                     $text = [
-                        'unique' => $customer["reff"] . ' ' . Carbon::now()->toIso8601String(),
-                        'text' => $customer["reff"] . ' ' . $input["first_name"] . ' ' . $input["last_name"] . ' ' . Carbon::now()->toIso8601String()
+                        'unique' => $customer['fieldData']["reff"] . ' ' . Carbon::now()->toIso8601String(),
+                        'text' => $customer['fieldData']["reff"] . ' ' . $input["first_name"] . ' ' . $input["last_name"] . ' ' . Carbon::now()->toIso8601String()
                     ];
         
                     
@@ -177,7 +178,7 @@ class RequestLabel extends Controller
                         "city" => $input["city"],
                         "state" => $input["state"],
                         "zip" => $input["zip"],
-                        "reff" =>  $customer["reff"],
+                        "reff" =>  $customer['fieldData']["reff"],
                         "date-request" => Carbon::now()->toIso8601String(),
                         "track-package" => $trackingID,
                         "order-status" => 'Kit Request',
@@ -192,20 +193,20 @@ class RequestLabel extends Controller
                     if ($responseLabel->successful()) {
 
 
-                        $existingRequestGoldPacks = $customer['request-gold-packs'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
+                        $existingRequestGoldPacks = $customer['fieldData']['request-gold-packs'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
                        
 
-                        $customerField['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['id']]);
+                        $customerField['fieldData']['request-gold-packs'] = array_merge($existingRequestGoldPacks, [$responseLabel['id']]);
                         //    Update Customer
                         $customerField = [
-                            "name" => $customer["name"],
+                            "name" => $customer['fieldData']["name"],
                             "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
-                            'request-gold-packs' => $customerField['request-gold-packs']
+                            'request-gold-packs' => $customerField['fieldData']['request-gold-packs']
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/" . $customer["_id"], ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
+                        ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/" . $customer["id"], ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -215,14 +216,14 @@ class RequestLabel extends Controller
                         }else{
                             return response()->json([
                                 'success' => false,
-                                'message' => 'Please check your input address or email'
+                                'message' => $responseCustomer->json()
                             ], 400);
                         }
         
                     } else {
                         return response()->json([
                             'success' => false,
-                            'message' => 'Please check your input address or email'
+                            'message' => $responseLabel->json()
                         ], 400);
                     }
                 } else {

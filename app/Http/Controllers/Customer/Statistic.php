@@ -17,7 +17,7 @@ class Statistic extends Controller
         
         if ($response->successful()) {
             $customerData = $response->json();
-            $requestGoldPacks = $customerData["items"][0]["request-gold-packs"];
+            $requestGoldPacks = $customerData["fieldData"]["request-gold-packs"];
     
             $totalGoldPacks = 0;
             $incompleteCount = 0;
@@ -38,23 +38,20 @@ class Statistic extends Controller
 
 
             foreach ($goldPackData as $goldPack) {
-                $goldPackItems = $goldPack["items"];
-    
-                foreach ($goldPackItems as $item) {
-                    if ($item["order-status"] != "Complete") {
-                        $incompleteCount++;
-                    } else {
-                        $completeCount++;
-                    }
-    
-                    // Check if "offers" field is a string
-                    if (isset($item["offers"])) {
-                        if (is_string($item["offers"])) {
-                            $offersArray = explode(",", $item["offers"]);
-                            $totalOffers += count($offersArray);
-                        } elseif (is_array($item["offers"])) {
-                            $totalOffers += count($item["offers"]);
-                        }
+   
+                if ($goldPack["fieldData"]["order-status"] != "Complete") {
+                    $incompleteCount++;
+                } else {
+                    $completeCount++;
+                }
+
+                // Check if "offers" field is a string
+                if (isset($goldPack["fieldData"]["offers"])) {
+                    if (is_string($goldPack["fieldData"]["offers"])) {
+                        $offersArray = explode(",", $goldPack["fieldData"]["offers"]);
+                        $totalOffers += count($offersArray);
+                    } elseif (is_array($goldPack["fieldData"]["offers"])) {
+                        $totalOffers += count($goldPack["fieldData"]["offers"]);
                     }
                 }
             }

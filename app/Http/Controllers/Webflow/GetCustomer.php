@@ -21,7 +21,7 @@ class GetCustomer extends Controller
             $groupedData = [];
     
             foreach ($data["items"] as $item) {
-                $email = $item["email"];
+                $email = $item["fieldData"]["email"];
     
                 // Jika query ada dan email cocok dengan query
                 if ($query && $email === $query) {

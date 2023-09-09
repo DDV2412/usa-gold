@@ -69,18 +69,18 @@ class Upload extends Controller
                 ])->timeout(30)->post("https://api.webflow.com/beta/collections/".env('DOCUMENT')."/items", ['fieldData' => $documentField, "isArchived" => false, "isDraft" => false]);
     
                 if ($responseDocument->successful()) {
-                    $existingDocument = $customer["items"][0]['document-uploads'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
+                    $existingDocument = $customer["fieldData"]['document-uploads'] ?? []; // Mengambil array yang sudah ada atau menggunakan array kosong jika belum ada
                     $customerField['document-uploads'] = array_merge($existingDocument, [$responseDocument['id']]);
                     //    Update Customer
                     $customerField = [
-                        "name" => $customer["items"][0]["name"],
+                        "name" => $customer["fieldData"]["name"],
                         "slug" => Str::slug(uniqid() . '-' . mt_rand(100000, 999999)),
                         'document-uploads' => $customerField['document-uploads']
                     ];
 
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
 
                     if ($responseCustomer->successful()) {
                         return response()->json([

@@ -22,8 +22,8 @@ class Referral extends Controller
 
 
         if ($customer->successful()) {
-            if (isset($customer["items"][0]["referrals"])) {
-                $referralId = $customer["items"][0]["referrals"];
+            if (isset($customer["fieldData"]["referrals"])) {
+                $referralId = $customer["fieldData"]["referrals"];
 
                 $referral = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
@@ -32,7 +32,7 @@ class Referral extends Controller
                 if($referral->successful()){
                     $referralsField = [
                         "name"=> $input["first_name"],
-                        "slug" =>  $referral["items"][0]["slug"],
+                        "slug" =>  $referral["fieldData"]["slug"],
                         "last-name"=> $input["last_name"],
                         "gender" => $input["gender"] ?? "",
                         "email"=> $input["email"],
@@ -46,18 +46,18 @@ class Referral extends Controller
 
                     $referralUpdate = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/".$referralId, ['fieldData' => $referralsField, "isArchived" => false, "isDraft" => false]);
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('REFERRALS')."/items/".$referralId, ['fieldData' => $referralsField, "isArchived" => false, "isDraft" => false]);
 
                     if($referralUpdate->successful()){
                         $customerField = [
-                            "name" => $customer["items"][0]["name"],
-                            "slug" => $customer["items"][0]["slug"],
+                            "name" => $customer["fieldData"]["name"],
+                            "slug" => $customer["fieldData"]["slug"],
                             "referrals" => $referralUpdate['id']
                         ];
         
                         $responseCustomer = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $tokenApi,
-                        ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
+                        ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField, "isArchived" => false, "isDraft" => false]);
         
                         if ($responseCustomer->successful()) {
                             return response()->json([
@@ -103,14 +103,14 @@ class Referral extends Controller
 
                 if($referralCreate->successful()){
                     $customerField = [
-                        "name" => $customer["items"][0]["name"],
-                        "slug" => $customer["items"][0]["slug"],
+                        "name" => $customer["fieldData"]["name"],
+                        "slug" => $customer["fieldData"]["slug"],
                         "referrals" => $referralCreate['id']
                     ];
     
                     $responseCustomer = Http::withHeaders([
                         'Authorization' => 'Bearer ' . $tokenApi,
-                    ])->timeout(30)->put("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField]);
+                    ])->timeout(30)->patch("https://api.webflow.com/beta/collections/".env('CUSTOMER')."/items/".$customer_id, ['fieldData' => $customerField]);
     
                     if ($responseCustomer->successful()) {
                         return response()->json([

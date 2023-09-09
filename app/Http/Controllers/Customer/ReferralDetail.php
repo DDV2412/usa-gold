@@ -17,10 +17,10 @@ class ReferralDetail extends Controller
         ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('CUSTOMER') . "/items/" .$customer_id);
     
         if ($response->successful()) {
-            if(isset($response["items"]["0"]["referrals"])){
+            if(isset($response["fieldData"]["referrals"])){
                 $referral = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $tokenApi,
-                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('REFERRALS') . "/items/" .$response["items"]["0"]["referrals"]);
+                ])->timeout(30)->get("https://api.webflow.com/beta/collections/" . env('REFERRALS') . "/items/" .$response["fieldData"]["referrals"]);
         
                 if($referral->successful()){
                     return response()->json([
